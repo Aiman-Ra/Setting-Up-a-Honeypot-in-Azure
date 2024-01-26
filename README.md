@@ -2,7 +2,7 @@
 
 
 <h2>Description</h2>
-In this porject we'll be setting up a honeypot in Microsoft Azure and locating attackers through an API and a Powershell script.
+In this project we'll be setting up a honeypot in Microsoft Azure and locating attackers with the use of an API and a Powershell script.
 
 <br>
 <br />
@@ -27,38 +27,41 @@ In this porject we'll be setting up a honeypot in Microsoft Azure and locating a
 
 ## Program Walk-through
 
-### Micrsoft Defender for Cloud:
+### Micrsoft Defender for Cloud
 
-To begin search for `Micrsoft Defender for Cloud` and enable it, then add your machine to it.
+To begin, search for `Micrsoft Defender for Cloud` and enable it, then add your machine to it and navigate to `Environment Settings` on the left.
 <p align="center">
-<img src="https://i.imgur.com/UR1GyXc.png" height="80%" width="80%"/>
+ <img src="https://i.imgur.com/UR1GyXc.png" height="80%" width="80%"/>
 
-Next, navigate to `Environment Settings` on the left and turn on `Servers` and turn off `SQL Servers` then go to `Data collection` on the left and choose `All events`
+Click on your machine and turn on `Servers`, turn off `SQL Servers` then go to `Data collection` on the left and choose `All events`
 <p align="center">
-<img src="https://i.imgur.com/IbzKsYp.png" height="80%" width="80%"/>
+ <img src="https://i.imgur.com/IbzKsYp.png" height="80%" width="80%"/>
 
 
 <h2> </h2>
 
-### Log Analytics Workspaces:
+### Log Analytics Workspaces
 
-Now we have to enable log 
-```
-nano /etc/elasticsearch/elasticsearch.yml
-```
+Now we have to add our machine to `Log Analytics Workspaces`, simply search for it and add your machine.
 <p align="center">
-<img src="https://i.imgur.com/JXoOF9k.png" height="80%" width="80%"/>
+ <img src="https://i.imgur.com/2UWW3P9.png" height="80%" width="80%"/>
 
-Now we have to start and enable ElasticSearch:
-```
-systemctl start elasticsearch
-systemctl enable elasticsearch
-```
+Once you've done that login to your machine with RDP and disable the firewall, that way attackers can find your machine.
+<p align="center">
+ <img src="https://i.imgur.com/ccpEMzt.png" height="80%" width="80%"/>
+
+
+
 <h2> </h2>
 
-### Configuring TheHive:
+### Locating the IP Addresses
+We'll have to sign-up to [ipgeolocation.io](ipgeolocation.io) to get our free API key so we can locate the attackers that are trying to login our machine. Afterwards, download or copy the [Powershell scrip](https://github.com/joshmadakor1/Sentinel-Lab/blob/main/Custom_Security_Log_Exporter.ps1) on your VM.
+<p align="center">
+ <img src="https://i.imgur.com/5jgpYfq.png" height="80%" width="80%"/>
 
-We start by changing the TheHive ownership to the destination directories:
+#### How it works
+The script looks for IP addresses found in Windows Event Viewer's `Event ID:4625` which stands for failed logons and sends them to ipgeolocation to grab their latitude and longitude. Afterwards, it adds them to a log file in `C:\ProgramData\(LOGFILE_NAME)` which we'll ingest into Log Analytics Workspaces. 
+
 ```
 chown -R thehive:thehive /opt/thp
 ```
