@@ -30,7 +30,7 @@ To begin, head to Microsft Azure to search for `Micrsoft Defender for Cloud` and
 <p align="center">
  <img src="https://i.imgur.com/UR1GyXc.png" height="80%" width="80%"/>
 
-Click on your machine and turn on `Servers`, turn off `SQL Servers` then go to `Data collection` on the left and choose `All events`
+Click on your machine and turn on `Servers`, turn off `SQL Servers` then go to `Data collection` on the left and choose `All events`.
 <p align="center">
  <img src="https://i.imgur.com/IbzKsYp.png" height="80%" width="80%"/>
 
@@ -99,4 +99,4 @@ Finally, click on `Visualization` and choose `Map` then `Map settings` and confi
 <img src="https://i.imgur.com/jbnV3cZ.png">
 
 ### Video Tutorial
-I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prfer to learn through videos, you can you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
+I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prfer to learn through videos, you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
