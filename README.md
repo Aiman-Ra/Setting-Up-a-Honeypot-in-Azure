@@ -2,15 +2,13 @@
 
 
 <h2>Description</h2>
-In this project we'll be setting up a honeypot in Microsoft Azure and locating attackers with the use of an API and a Powershell script.
+In this project, we'll be setting up a honeypot in Microsoft Azure and locating attackers with the use of an API and a Powershell script.
 
 <br>
 <br />
 
 > [!NOTE]
->Please setup a VM on Azure before attemping this.
-
-
+>Please setup a VM on Azure before attempting this.
 
 
 <h2>Utilities and Languages Used</h2>
@@ -28,7 +26,7 @@ In this project we'll be setting up a honeypot in Microsoft Azure and locating a
 ## Program Walk-through
 
 ### Micrsoft Defender for Cloud
-To begin, search for `Micrsoft Defender for Cloud` and enable it, then add your machine to it and navigate to `Environment Settings` on the left.
+To begin, head to Microsft Azure to search for `Micrsoft Defender for Cloud` and enable it, then add your machine to it and navigate to `Environment Settings` on the left.
 <p align="center">
  <img src="https://i.imgur.com/UR1GyXc.png" height="80%" width="80%"/>
 
@@ -44,189 +42,61 @@ Now we have to add our machine to `Log Analytics Workspaces`, simply search for 
 <p align="center">
  <img src="https://i.imgur.com/2UWW3P9.png" height="80%" width="80%"/>
 
-Once you've done that login to your machine with RDP and disable the firewall, that way attackers can find your machine.
+Once you've done that, login to your machine with RDP and disable the firewall. That way, attackers can find your machine and we can get their IP address.
 <p align="center">
  <img src="https://i.imgur.com/ccpEMzt.png" height="80%" width="80%"/>
 
+> [!WARNING]
+> Never do this in a live production environment!
 
 
 <h2> </h2>
 
 ### Locating the IP Addresses
-We'll have to sign-up to [ipgeolocation.io](https://www.ipgeolocation.io) to get our free API key so we can locate the attackers that are trying to login our machine. Afterwards, download or copy the [Powershell script](https://github.com/joshmadakor1/Sentinel-Lab/blob/main/Custom_Security_Log_Exporter.ps1) on your VM and open it with `Powershell ISE`.
+We'll have to sign up at [ipgeolocation.io](https://www.ipgeolocation.io) to get our free API key so we can locate the attackers that are trying to login to our machine. Afterwards, download or copy the [Powershell script](https://github.com/joshmadakor1/Sentinel-Lab/blob/main/Custom_Security_Log_Exporter.ps1) on your VM and open it with `Powershell ISE` then add your API key and run it.
 <p align="center">
- <img src="https://i.imgur.com/5jgpYfq.png" height="80%" width="80%"/>
+ <img src="https://i.imgur.com/KM0quPJ.png" height="80%" width="80%"/>
 
 #### How it works
 The script looks for IP addresses found in Windows Event Viewer's `Event ID:4625` which stands for failed logons, and sends them to ipgeolocation to grab their latitude and longitude. Afterwards, it adds them to a log file in `C:\ProgramData\(LOGFILE_NAME)` which we'll ingest into Log Analytics Workspaces. 
 
 ### Ingesting Logs into LAW
-Next, make a new log file on your desktop then copy and paste the contents created in the log file found in `C:\ProgramData\(LOGFILE_NAME)` on your VM. Head back to Azure LAW and click on `Tables` on the left then create `New Custom Log (MMA-Based)` and add the log file.
+Next, make a new log file on your desktop, then copy and paste the contents created in the log file found in `C:\ProgramData\(LOGFILE_NAME)` on your VM. Head back to Azure LAW and click on `Tables` on the left then create `New Custom Log (MMA-Based)` and add the log file.
 <p align="center">
  <img src="https://i.imgur.com/xHJbEOj.png" height="80%" width="80%"/>
 <br>
 
-Now click `Logs` on the left and type in the name of the log file we just added and run it.
+Now click `Logs` on the left and type in the name of the log file we just added, and run it to see if it works.
 <p align="center">
  <img src="https://i.imgur.com/1lBgLna.png" height="80%" width="80%"/>
-<br>
 
-
- 
-<h2> </h2> 
-
-### Adding The Agent
-
-In the Wazuh directory, there's a tar file containing the credentials we'll need to log in. The main two are "admin user" and "API user"
-
-```
-tar -xvf wazuh-install-files.tar
-cd wazuh-install-files
-cat wazuh-passwords.txt 
-```
-Now we can add an agent to start collecting telemetry. In the Wazuh dashboard click on "Add agent" and follow the prompts. Be sure to set your Wazuh public IP address as the server IP address.
-<br/>
-> [!TIP]
-> You'll need to run the terminal with admin privileges when adding the agent
-<br>
-
-#### Configuring The Agent
-
-To ingest logs for our telemetry collection, we need to edit the "ossec.conf" file. You'll either find it in `C:\Program Files (x86)\ossec-agent` for Windows OS or in `/var/ossec/etc/` for Linux OS.
-<br/>
-Inside the file you'll find `<!-- Log Analysis -->`, this is where you can add the location of the logs you want to collect. Make sure to restart Wazuh after editing the conf file.
-
-<p align="center">
-<img src="https://i.imgur.com/GPz81qk.png" height="80%" width="80%"/>
-<br/>
-
-> [!IMPORTANT]
-> It's best practice to create a backup file in case things go wrong!
 
 
 <h2> </h2> 
 
-### Configuring Wazuh
-
-Next, we'll have to enable Wazuh to ingest these logs. To do so, we need to edit the filebeat.yml in the Wazuh Manager's CLI and enable archiving.
-```
-sudo nano /etc/filebeat/filebeat.yml
-```
-
+### Creating the Map
+It's finally time to create our map so we can see where the attacks are coming from. Search `Sentinel` and add your machine, then click on `Workbooks` on the left then `Add Workbook`.
 <p align="center">
-<img src="https://i.imgur.com/8JODF9s.png" height="80%" width="80%"/>
-
-Head back to the Wazuh dahsboard, and click on the top left menu button > Stack management > Index pattern > Create index, and name it "wazuh-archives-**" so we can search everything. In the "Time field" choose "timestamp" and finally, Create index pattern.
-
-<p align="center">
-<img src="https://i.imgur.com/kmtg95u.png" height="80%" width="80%"/>
-
-<h2> </h2> 
-
-### Creating Rules
-
-It's time to create our first rule! In this example we want to detect Mimikatz usage in our network.
+ <img src="https://i.imgur.com/VZRXNIV.png" height="80%" width="80%"/>
 <br>
-In the Wazuh dashboard click on "wazuh." > Management > Rules > Manage rules file. 
-<br> 
-Search "sysmon" and you can find "0800-sysmon_id_1.xml", click on the eye icon to the right of it to view it then copy any of the rules so you can use it as a template for your first custom rule.
 
+Now we have to parse through the log to get the relevant information we need for the map. Go into the newly created workbook, then click `Add Query` and insert the following:
+```
+failed_rdp_geo_CL
+| parse RawData with * "latitude:" Latitude ",longitude:" Longitude ",destinationhost:" DestinationHost ",username:" Username ",sourcehost:" Sourcehost ",state:" State ", country:" Country ",label:" Label ",timestamp:" Timestamp 
+| summarize event_count=count() by Timestamp, Label, Country, State, Sourcehost, Username, Longitude, Latitude
+```
+
+Finally, click on `Visualization` and choose `Map` then `Map settings` and configure it as:
 <p align="center">
-<img src="https://i.imgur.com/Sw536g2.png" height="80%" width="80%"/>
-
-
-Click on "custom rules" and you should find "local_rules.xml", click on "edit" and paste in the rule we just copied (Make sure to follow the same indentation).
+ <img src="https://i.imgur.com/0gOW323.png" height="80%" width="80%"/>
 <br>
-Custom rules id start from 100000 and the severity levels range from 1 to 15 (most severe).
-
-<p align="center">
-<img src="https://i.imgur.com/aKq3gXV.png" height="80%" width="80%"/>
-<br/>
-
-> [!NOTE]
-> Rules are case sensitive!
-
-<h2> </h2> 
-
-### Configuring Shuffle
-
-Finally, to tie everything up we'll use [Shuffle](https://shuffler.io) as our SOAR platform. Create an account then navigate to "Workflows" and add a new workflow.
-<br>
-Next, click on "Triggers" in the bottom left and grab and drop the "Webhook" onto the canvas and name it "Wazuh-Alerts" then copy the "Webhook URI"
-
-<p align="center">
-<img src="https://i.imgur.com/jEi0zXO.png" height="80%" width="80%"/>
-<br/>
-
-Head back to the Wazuh Manager's CLI and open the ossec.conf file then paste in the "Webhook URI" between the `<global>` and `<alert>` tags (Make sure to follow the same indentation). 
-```
-sudo nano /var/ossec/etc/ossec.conf
-```
-
-<p align="center">
-<img src="https://i.imgur.com/vo8N8I3.png" height="80%" width="80%"/>
-
-As always, whenever we change the config file we must restart the service.
-```
-systemctl restart wazuh-manager.service
-```
-
-#### Parsing Data
-
-Since we're collecting lots of information, we want to parse the exact data to make it easier to understand. In this case we'll parse the hash value so we can feed it into VirusTotal:
-1. Click on "Change_me" to rename it and set the "Find Actions" to "Regex capture group". 
-2. In "input data" click the + icon and choose "hashes".
-3. In the "Regex" field enter "SHA256=([0-9A-Fa-f]{64})", this enables us to parse the SHA256 hash.
-
-<p align="center">
-<img src="https://i.imgur.com/98k96YO.png" height="80%" width="80%"/>
-<br/>
-
-#### Incorporating VirusTotal
-
-Shuffle allows us to use VirusTotal for enrichment. To do so, we'll have to sign up for VirusTotal and copy the API key for our account. Now let's set it up to look up the hash on our Mimikatz file:
-1. In Shuffle search "Virustotal" in "Active Apps", then drag and drop it on the canvas.
-2. Click on the VirusTotal icon then "Authenticate" and enter your API key.
-3. In "Find Actions" choose "Get a hash report".
-4. In the "Hash" field click the + icon and choose "SHA256_Regex" then "List"
-5. Save and run it
-
-<p align="center">
-<img src="https://i.imgur.com/bapWcRC.png" height="80%" width="80%"/>
-<br/>
-
-<h2> </h2> 
-
-### Creating Alerts
-Log-in to TheHive with the default credentials (provided in the Installation Instruction file), then create a new organization and create 2 accounts within it: a service account and a normal account. 
-<br>
-For the service account create an API Key and copy it. Next, log-in using the normal account you just created, and head back to Shuffle set up Thehive:
-1. Search "TheHive" in "Active Apps", then drag and drop it on the canvas.
-2. Click on the TheHive icon then Authenticate and add in your API key, for the url add in your TheHive public IP address along with the port number.
-3. In "Find Actions" choose "Create Alert", then scroll down until you find the "Date" field and choose Execution Argument > utcTime
-4. Add in the description you want to assist the Analyst with investigating the alert.
-5. Set Flag to "false", Pap to 2, Severity to 2, Source to "Wazuh" and Status to "New".
-6. In the Tags field, you can add in the Mitre Attack Tag brackets. In this case ["T10003"] stands for credentials dumping, which is what Mimikatz is known for.
-
-<p align="center">
-<img src="https://i.imgur.com/hoGujCk.png" align="center" height="80%" width="80%"/>
-<br>
-<img src="https://i.imgur.com/DLH0OzE.png" height="80%" width="80%"/>
-<br/>
-
-<h2> </h2> 
-
-## Video Tutorial
-Major shout-out to [MyDFIR](https://www.youtube.com/@MyDFIR) for sharing his knowledge with us. If you prefer to learn through videos you can [find his tutorial here](https://www.youtube.com/watch?v=XR3eamn8ydQ)
 
 
-</p>
-<!--
- ```diff
-- text in red
-+ text in green
-! text in orange
-# text in gray
-@@ text in purple (and bold)@@
-```
---!>
+
+### The Map
+
+<img src="https://i.imgur.com/jbnV3cZ.png">
+
+### Video Tutorial
+I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prfer to learn through videos, you can you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
