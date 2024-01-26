@@ -99,4 +99,4 @@ Finally, click on `Visualization` and choose `Map` then `Map settings` and confi
 <img src="https://i.imgur.com/jbnV3cZ.png">
 
 ### Video Tutorial
-I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prfer to learn through videos, you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
+I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prefer to learn through videos, you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
