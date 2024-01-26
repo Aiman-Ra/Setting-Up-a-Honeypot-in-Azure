@@ -87,16 +87,17 @@ failed_rdp_geo_CL
 | summarize event_count=count() by Timestamp, Label, Country, State, Sourcehost, Username, Longitude, Latitude
 ```
 
-Finally, click on `Visualization` and choose `Map` then `Map settings` and configure it as:
+Lastly, click on `Visualization` and choose `Map` then `Map settings` and configure it as follows:
 <p align="center">
  <img src="https://i.imgur.com/0gOW323.png" height="80%" width="80%"/>
 <br>
 
-
+<h2> </h2>
 
 ### The Map
-
 <img src="https://i.imgur.com/jbnV3cZ.png">
+
+<h2> </h2>
 
 ### Video Tutorial
 I have to give credit to [Josh Madakor](https://github.com/joshmadakor1) for coming up with the idea and creating the Powershell script. If you prefer to learn through videos, you can [find his tutorial here.](https://www.youtube.com/watch?v=RoZeVbbZ0o0)
