@@ -28,7 +28,6 @@ In this project we'll be setting up a honeypot in Microsoft Azure and locating a
 ## Program Walk-through
 
 ### Micrsoft Defender for Cloud
-
 To begin, search for `Micrsoft Defender for Cloud` and enable it, then add your machine to it and navigate to `Environment Settings` on the left.
 <p align="center">
  <img src="https://i.imgur.com/UR1GyXc.png" height="80%" width="80%"/>
@@ -41,7 +40,6 @@ Click on your machine and turn on `Servers`, turn off `SQL Servers` then go to `
 <h2> </h2>
 
 ### Log Analytics Workspaces
-
 Now we have to add our machine to `Log Analytics Workspaces`, simply search for it and add your machine.
 <p align="center">
  <img src="https://i.imgur.com/2UWW3P9.png" height="80%" width="80%"/>
@@ -55,31 +53,26 @@ Once you've done that login to your machine with RDP and disable the firewall, t
 <h2> </h2>
 
 ### Locating the IP Addresses
-We'll have to sign-up to [ipgeolocation.io](ipgeolocation.io) to get our free API key so we can locate the attackers that are trying to login our machine. Afterwards, download or copy the [Powershell scrip](https://github.com/joshmadakor1/Sentinel-Lab/blob/main/Custom_Security_Log_Exporter.ps1) on your VM.
+We'll have to sign-up to [ipgeolocation.io](https://www.ipgeolocation.io) to get our free API key so we can locate the attackers that are trying to login our machine. Afterwards, download or copy the [Powershell script](https://github.com/joshmadakor1/Sentinel-Lab/blob/main/Custom_Security_Log_Exporter.ps1) on your VM and open it with `Powershell ISE`.
 <p align="center">
  <img src="https://i.imgur.com/5jgpYfq.png" height="80%" width="80%"/>
 
 #### How it works
-The script looks for IP addresses found in Windows Event Viewer's `Event ID:4625` which stands for failed logons and sends them to ipgeolocation to grab their latitude and longitude. Afterwards, it adds them to a log file in `C:\ProgramData\(LOGFILE_NAME)` which we'll ingest into Log Analytics Workspaces. 
+The script looks for IP addresses found in Windows Event Viewer's `Event ID:4625` which stands for failed logons, and sends them to ipgeolocation to grab their latitude and longitude. Afterwards, it adds them to a log file in `C:\ProgramData\(LOGFILE_NAME)` which we'll ingest into Log Analytics Workspaces. 
 
-```
-chown -R thehive:thehive /opt/thp
-```
-Next, in the "application.conf" file change all the `hostname` and `application.baseUrl` to your TheHive IP address:
-
-```
-nano /etc/thehive/application.conf
-```
-
+### Ingesting Logs into LAW
+Next, make a new log file on your desktop then copy and paste the contents created in the log file found in `C:\ProgramData\(LOGFILE_NAME)` on your VM. Head back to Azure LAW and click on `Tables` on the left then create `New Custom Log (MMA-Based)` and add the log file.
 <p align="center">
-<img src="https://i.imgur.com/BJjQZWb.png" height="80%" width="80%"/>
+ <img src="https://i.imgur.com/xHJbEOj.png" height="80%" width="80%"/>
+<br>
 
-Once again, we have to start and enable TheHive:
-```
-systemctl start thehive
-systemctl enable thehive
-```
+Now click `Logs` on the left and type in the name of the log file we just added and run it.
+<p align="center">
+ <img src="https://i.imgur.com/1lBgLna.png" height="80%" width="80%"/>
+<br>
 
+
+ 
 <h2> </h2> 
 
 ### Adding The Agent
